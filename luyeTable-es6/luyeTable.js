@@ -490,7 +490,7 @@ export default class LuyeTable {
             data.forEach(row => {
                 let arr = [];
                 for (let [index, value] of columns.entries()) {
-                    let str = row[value.cdata] + "";
+                    let str = row[value.cdata] + '';
                     str && str.includes(',') && (str = str.replace(',', '，'));
                     arr.push(str);
                     if (index == columns.length - 1) {
@@ -499,7 +499,7 @@ export default class LuyeTable {
                 }
             });
             exportedData.unshift((columns.map(row => row.cname)) + '\n');
-            const blob = new Blob(exportedData, {type: "text/plain;charset=utf-8"});
+            const blob = new Blob(exportedData, {type: 'text/plain;charset=utf-8'});
             saver.saveAs(blob, "download.csv");
         });
     }
@@ -562,6 +562,6 @@ export default class LuyeTable {
     }
 
     destroy() {
-        this.param.el.empty();
+        this.param.el.remove();
     }
 }
