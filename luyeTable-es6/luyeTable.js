@@ -1,9 +1,9 @@
 import {data} from './data';
 import './luyeTable.less';
 import 'babel-polyfill';
-const saver = require('file-saver');
-const deepClone = require('lodash.clonedeep');
-const sortBy = require('lodash.sortby');
+import deepClone from 'lodash.clonedeep';
+import sortBy from 'lodash.sortby';
+import saver from 'file-saver';
 
 export default class LuyeTable {
     constructor(param) {
