@@ -506,7 +506,7 @@ export default class LuyeTable {
 
     resetSortingArrows() {
         this.wdtb.querySelectorAll('thead .arrows.invisible').forEach((el)=> {
-                el.toggle('invisible');
+                el.classList.toggle('invisible');
             }
         );
     }
