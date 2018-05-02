@@ -18,16 +18,17 @@ export default class LuyeTable {
             columns: null,
             // optional
             dirtyCheck: false,
-            export: true,
-            pagination: true,
+            export: false,
+            pagination: false,
             pageCount: 20,
-            globalSearch: true,
-            manageColumns: true,
+            globalSearch: false,
+            manageColumns: false,
             management: false,
             //initial value lost at first evaluation
-            managePageSize: true
+            managePageSize: false,
+            tableClass: '',
         };
-        Object.assign(this.param, param);
+        this.param = Object.assign(this.param, param);
         this.initData();
         this.metadata = {
             processingData: deepClone(this.param.data),
@@ -113,6 +114,9 @@ export default class LuyeTable {
         // const variables that cannot be reevaluated but can do dom manipulation
         this.wdtb = document.createElement('table');
         this.wdtb.setAttribute('id', 'LuyeTable');
+        if (this.tableClass) {
+            this.wdtb.classList.add(this.tableClass);
+        }
         this.renderHead();
         this.renderBody();
         this.param.el.innerHTML = '';
@@ -154,13 +158,21 @@ export default class LuyeTable {
     renderRightBoard() {
         const div = document.createElement('div');
         div.classList.add('right-board');
-        div.innerHTML = `${this.param.export ? '<input id="global-search" placeholder="全局关键字查询"/>' : ''}
-          <button class="column-management">列管理</button><button class="column-reset">重置</button>
-          ${this.param.globalSearch ? '<button id = "export-btn">导出</button>' : ''}`;
+        let innerHtml = '';
+        if (this.param.globalSearch) {
+            innerHtml += '<input id="global-search" placeholder="全局关键字查询"/>';
+        }
+        if (this.param.manageColumns) {
+            innerHtml += '<button class="column-management">列管理</button><button class="column-reset">重置</button>';
+        }
+        if (this.param.export) {
+            innerHtml += '<button id="export-btn">导出</button>';
+        }
+        div.innerHTML = innerHtml;
         this.wdtb.parentNode.insertBefore(div, this.wdtb);
-        this.attachGlobalSearchEvent(div);
-        this.attachColumnManagementEvents(div);
-        this.attachExportEvent(div);
+        this.param.globalSearch && this.attachGlobalSearchEvent(div);
+        this.param.manageColumns && this.attachColumnManagementEvents(div);
+        this.param.export && this.attachExportEvent(div);
     }
 
     renderBody(keywords) {
@@ -180,6 +192,9 @@ export default class LuyeTable {
                 }
                 else if (!col.type) {
                     let tpl_txt = tr[col.cdata] === undefined ? '' : tr[col.cdata] + '';
+                    if (col.filter) {
+                        tpl_txt = col.filter(tpl_txt);
+                    }
                     keywords && keywords.forEach(keyword => {
                         if (tpl_txt.includes(keyword)) {
                             let yellowstr = `<span class="yellowed">${keyword}</span>`;
