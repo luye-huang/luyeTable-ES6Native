@@ -457,6 +457,8 @@ export default class LuyeTable {
         const that = this;
         el.querySelector('button.column-management').addEventListener('click', function () {
             if (this.innerText == '列管理') {
+                this.previousElementSibling.value = '';
+                that.queryAll('');
                 document.querySelectorAll('thead input').forEach((el) => el.classList.remove('hide'));
                 this.innerText = '确定';
             }
