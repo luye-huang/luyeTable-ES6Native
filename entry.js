@@ -3,9 +3,12 @@
  */
 import LuyeTable from './luyeTable-es6/luyeTable';
 
-console.log(6622);
 function aa() {
     console.log(arguments);
+}
+function tdRender(data) {
+    console.log(data);
+    return `<span style="color:green">${data}</span>`;
 }
 var tbParam = {
     el: document.getElementById('table'),
@@ -13,6 +16,8 @@ var tbParam = {
         {cname: '代码行总数', cdata: 'code_count', style: 'hide'},
         {cname: '提交文件总数', cdata: 'file_count'},
         {cname: '团队总得分', cdata: 'tscore', action: 'click', trigger: aa},
+        {cname: 'template', template: '<span style="color:red">888</span>'},
+        {cname: 'tdrender', template: '<span style="color:red">888</span>', tdRender: tdRender, cdata: 'code_count'},
         {cname: '操作', type: 'management'}
     ],
     manageColumns: true

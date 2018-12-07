@@ -120,6 +120,7 @@ export default class LuyeTable {
         this.param.pagination && this.renderPages();
         this.param.managePageSize && this.renderLeftBoard();
         this.renderRightBoard();
+        this.bindDelegates();
     }
 
     renderHead() {
@@ -136,7 +137,6 @@ export default class LuyeTable {
             thead.childNodes[1].remove();
         }
         this.wdtb.appendChild(thead);
-        this.delegateTableheadEvents();
     }
 
     renderLeftBoard() {
@@ -172,7 +172,13 @@ export default class LuyeTable {
             row.dataset.rowData = JSON.stringify(tr);
             columns.forEach(col => {
                 const td = document.createElement('td');
-                if (!col.type) {
+                if (col.tdRender) {
+                    td.innerHTML = col.tdRender(tr[col.cdata]);
+                }
+                else if (col.template) {
+                    td.innerHTML = col.template;
+                }
+                else if (!col.type) {
                     let tpl_txt = tr[col.cdata] === undefined ? '' : tr[col.cdata] + '';
                     keywords && keywords.forEach(keyword => {
                         if (tpl_txt.includes(keyword)) {
@@ -225,7 +231,6 @@ export default class LuyeTable {
             tbody.appendChild(row);
         });
         this.wdtb.appendChild(tbody);
-        this.param.management && this.delegateTablebodyEvents();
     }
 
     renderPages() {
@@ -285,6 +290,11 @@ export default class LuyeTable {
         }
     }
 
+    bindDelegates() {
+        this.delegateTableheadEvents();
+        this.param.management && this.delegateTablebodyEvents();
+    }
+
     delegateTableheadEvents() {
         const {param, metadata, that = this} = this;
         this.wdtb.addEventListener('click', function (evt) {
@@ -302,13 +312,38 @@ export default class LuyeTable {
                 that.refresh();
                 cList.toggle('invisible');
             }
+
+        }, false);
+        this.wdtb.addEventListener('dblclick', (evt) => {
+            if (evt.target.tagName == 'TH') {
+                const inputs = Array.from(this.wdtb.querySelectorAll('thead input')).filter((el) => el.classList.contains('hide'));
+                if (inputs.length) {
+                    this.metadata.processingColumns.forEach(el => el.style = '');
+                    this.renderHead();
+                    this.renderBody();
+                    document.querySelectorAll('thead input').forEach(el => el.classList.remove('hide'));
+                } else {
+                    for (let [index, value] of this.metadata.processingColumns.entries()) {
+                        let checked = this.wdtb.querySelectorAll('thead input')[index].checked;
+                        if (checked) {
+                            value.style = null;
+                        }
+                        else {
+                            value.style = 'hide';
+                        }
+                    }
+                    this.renderHead();
+                    this.renderBody();
+                }
+            }
         }, false);
     }
 
     delegateTablebodyEvents() {
         const that = this;
         this.wdtb.addEventListener('click', function (evt) {
-            if (evt.target.classList.contains('row-view')) {
+            const cList = evt.target.classList;
+            if (cList.contains('row-view')) {
                 this.querySelector('#detail-modal') && this.querySelector('#detail-modal').remove();
                 const data = JSON.parse(evt.target.parentNode.parentNode.dataset.rowData);
                 const div = document.createElement('div');
@@ -326,10 +361,7 @@ export default class LuyeTable {
                 div.querySelector('.modal-content').appendChild(frag);
                 that.wdtb.appendChild(div);
             }
-        });
-
-        this.wdtb.addEventListener('click', function (evt) {
-            if (evt.target.classList.contains('row-edit')) {
+            else if (cList.contains('row-edit')) {
                 this.querySelector('#detail-modal') && this.querySelector('#detail-modal').remove();
                 const tr = evt.target.parentNode.parentNode;
                 tr.id = 'editting';
@@ -352,19 +384,14 @@ export default class LuyeTable {
                 div.querySelector('.modal-content').appendChild(frag);
                 that.wdtb.appendChild(div);
             }
-        });
-
-        this.wdtb.addEventListener('click', function (evt) {
-            if (evt.target.classList.contains('row-delete')) {
+            else if (cList.contains('row-delete')) {
                 const tr = evt.target.parentNode.parentNode;
                 const data = JSON.parse(tr.dataset.rowData);
                 that.param.handlerDelete && that.param.handlerDelete(data);
                 tr.remove();
+                document.getElementById('detail-modal') && document.getElementById('detail-modal').remove();
             }
-        });
-
-        this.wdtb.addEventListener('click', function (evt) {
-            if (evt.target.classList.contains('modal-edit')) {
+            else if (cList.contains('modal-edit')) {
                 const row = this.querySelector('#editting');
                 const modal = evt.target.parentNode.parentNode;
                 const inputs = modal.querySelectorAll('input');
@@ -379,10 +406,7 @@ export default class LuyeTable {
                 modal.remove();
                 row.removeAttribute('id');
             }
-        });
-
-        this.wdtb.addEventListener('click', function (evt) {
-            if (evt.target.classList.contains('modal-close')) {
+            else if (cList.contains('modal-close')) {
                 evt.target.parentNode.parentNode.remove();
             }
         });
@@ -459,7 +483,7 @@ export default class LuyeTable {
             if (this.innerText == '列管理') {
                 this.previousElementSibling.value = '';
                 that.queryAll('');
-                document.querySelectorAll('thead input').forEach((el) => el.classList.remove('hide'));
+                that.wdtb.querySelectorAll('thead input').forEach((el) => el.classList.remove('hide'));
                 this.innerText = '确定';
             }
             else if (this.innerText == '确定') {
