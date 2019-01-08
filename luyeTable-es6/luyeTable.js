@@ -184,12 +184,15 @@ export default class LuyeTable {
             row.dataset.rowData = JSON.stringify(tr);
             columns.forEach(col => {
                 const td = document.createElement('td');
+                //allow user to customize td with function
                 if (col.tdRender) {
                     td.innerHTML = col.tdRender(tr[col.cdata]);
                 }
+                //allow user to customize td with template
                 else if (col.template) {
                     td.innerHTML = col.template;
                 }
+                //search highlighting
                 else if (!col.type) {
                     let tpl_txt = tr[col.cdata] === undefined ? '' : tr[col.cdata] + '';
                     if (col.filter) {
