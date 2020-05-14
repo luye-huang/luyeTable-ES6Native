@@ -114,6 +114,8 @@ export default class LuyeTable {
         // const variables that cannot be reevaluated but can do dom manipulation
         this.wdtb = document.createElement('table');
         this.wdtb.setAttribute('id', 'LuyeTable');
+        const slider = document.createElement('div');
+        slider.id = 'slider';
         if (this.tableClass) {
             this.wdtb.classList.add(this.tableClass);
         }
@@ -121,6 +123,7 @@ export default class LuyeTable {
         this.renderBody();
         this.param.el.innerHTML = '';
         this.param.el.appendChild(this.wdtb);
+        this.param.el.appendChild(slider);
         this.param.pagination && this.renderPages();
         this.param.managePageSize && this.renderLeftBoard();
         this.renderRightBoard();
@@ -427,6 +430,7 @@ export default class LuyeTable {
             else if (cList.contains('modal-close')) {
                 evt.target.parentNode.parentNode.remove();
             }
+            document.getElementById('slider').classList.toggle('sliding')
         });
     }
 
